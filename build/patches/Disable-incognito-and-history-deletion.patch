@@ -1,0 +1,83 @@
+From: you <you@example.com>
+Date: Mon, 1 Jan 2024 00:00:00 +0000
+Subject: Disable incognito and history deletion
+License: GPL-2.0-or-later
+
+---
+ chrome/browser/ui/browser_commands.cc                        | 3 +++
+ chrome/browser/profiles/profile_manager.cc                   | 3 +++
+ components/history/core/browser/history_backend.cc           | 6 ++++++
+ chrome/browser/extensions/api/history/history_api.cc         | 4 ++++
+
+diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
+--- a/chrome/browser/ui/browser_commands.cc
++++ b/chrome/browser/ui/browser_commands.cc
+@@ -1,4 +1,7 @@
+ void NewIncognitoWindow(Profile* profile) {
++  // FORK MOD: Incognito disabled - redirect to normal window
++  NewWindow(browser);
++  return;
+   Browser* browser = new Browser(
+
+diff --git a/chrome/browser/profiles/profile_manager.cc b/chrome/browser/profiles/profile_manager.cc
+--- a/chrome/browser/profiles/profile_manager.cc
++++ b/chrome/browser/profiles/profile_manager.cc
+@@ -1,4 +1,7 @@
+ Profile* ProfileManager::GetOffTheRecordProfile(Profile* base_profile) {
++  // FORK MOD: Return normal profile instead of incognito
++  return base_profile;
+
+diff --git a/components/history/core/browser/history_backend.cc b/components/history/core/browser/history_backend.cc
+--- a/components/history/core/browser/history_backend.cc
++++ b/components/history/core/browser/history_backend.cc
+@@ -1,4 +1,7 @@
+ void HistoryBackend::DeleteAllHistory() {
++  // FORK MOD: History deletion disabled
++  return;
+
+ void HistoryBackend::DeleteURL(const GURL& url) {
++  // FORK MOD: Single URL deletion disabled
++  return;
+
+ void HistoryBackend::DeleteURLs(const std::vector<GURL>& urls) {
++  // FORK MOD: Multiple URL deletion disabled
++  return;
+
+diff --git a/chrome/browser/extensions/api/history/history_api.cc b/chrome/browser/extensions/api/history/history_api.cc
+--- a/chrome/browser/extensions/api/history/history_api.cc
++++ b/chrome/browser/extensions/api/history/history_api.cc
+@@ -1,4 +1,8 @@
+ ExtensionFunction::ResponseAction HistoryDeleteUrlFunction::Run() {
++  // FORK MOD: Extension history deletion blocked
++  return RespondNow(Error("History deletion is disabled."));
+
+ ExtensionFunction::ResponseAction HistoryDeleteAllFunction::Run() {
++  // FORK MOD: Extension history deletion blocked
++  return RespondNow(Error("History deletion is disabled."));
+```
+
+---
+
+### STEP 3 — Register Your Patch
+
+Navigate to:
+```
+build → cromite_patches_list.txt
+```
+
+Click the pencil ✏️ to edit it and add your patch name at the bottom of the list:
+```
+Disable-incognito-and-history-deletion.patch
+```
+
+Click **"Commit changes"**
+
+---
+
+### STEP 4 — Trigger the Build
+```
+1. Click "Actions" tab in your fork
+2. Find the workflow called "Build Cromite" or similar
+3. Click "Run workflow"
+4. Wait 4-8 hours
+5. Download the APK from the Artifacts section when done
